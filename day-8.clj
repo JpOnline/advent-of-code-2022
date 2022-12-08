@@ -6,15 +6,29 @@
 35390")
 
 (defn visible? [row column field]
-  (let [top-ones (map #(get-in field [% column]) (range row))
-        bottom-ones (map #(get-in field [% column]) (range (inc row) (count field)))
-        left-ones (map #(get-in field [row %]) (range column))
-        right-ones (map #(get-in field [row %]) (range (inc column) (count (first field))))
+  (let [top-ones    (map #(get-in field [% column]) (range row))
+        bottom-ones (map #(get-in field [% column]) (range (inc row)    (count field)))
+        left-ones   (map #(get-in field [row %])    (range column))
+        right-ones  (map #(get-in field [row %])    (range (inc column) (count (first field))))
         tree-hight (get-in field [row column])
         higher-tree? #(>= % tree-hight)]
     (some #(not-any? higher-tree? %) [top-ones right-ones bottom-ones left-ones])))
     ;; [top-ones right-ones bottom-ones left-ones]))
     
+;; Another option. More readable? 🤷
+(defn visible?-option-2 [row column field]
+  (let [get-trees (fn [direction]
+                    (->> [row column]
+                      (iterate #(mapv + direction %))
+                      (map #(get-in field %))
+                      (take-while some?)
+                      (rest)))
+        directions [[0 -1] [1 0] [0 1] [-1 0]]
+        trees-in-directions (map get-trees directions)
+        tree-hight (get-in field [row column])
+        higher-tree? #(>= % tree-hight)]
+    (some #(not-any? higher-tree? %) trees-in-directions)))
+
 ;; Part One
 (let [field (->> input
               (clojure.string/split-lines)
