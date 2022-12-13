@@ -66,14 +66,6 @@
   (remove #{""})
   (map edn/read-string)
   (#(conj % [[2]] [[6]]))
-  ((fn [lists]
-     (loop [sorted []
-            to-sort lists]
-       (if (empty? to-sort)
-         sorted
-         (let [smaller (reduce (fn [v1 v2] (if (right-order? v1 v2) v1 v2)) to-sort)
-               new-sorted (conj sorted smaller)
-               new-to-sort (remove #{smaller} to-sort)]
-           (recur new-sorted new-to-sort))))))
+  (sort #(if (right-order? %1 %2) -1 1))
   (map-indexed #(if (#{[[2]] [[6]]} %2) (inc %1) 1))
   (apply *))
